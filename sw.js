@@ -1,4 +1,4 @@
-const cacheName = 'vibecalculator-v2';
+const cacheName = 'vibecalculator-v1';
 const assets = ['./', './index.html', './manifest.json'];
 
 // Installa il Service Worker e salva i file in cache
