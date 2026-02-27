@@ -126,6 +126,20 @@ button {
     </div>
 
     <script>
+        function formattaElegante(valore) {
+    if (valore === "" || valore === undefined) return "";
+    
+    // Trasformiamo il valore in un numero vero
+    let numero = parseFloat(valore);
+    
+    // Se non è un numero (es. errore), restituisci il valore così com'è
+    if (isNaN(numero)) return valore;
+
+    return numero.toLocaleString('it-IT', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 10 // Permette fino a 10 decimali se l'utente li scrive
+    });
+}
         // IL CERVELLO (JavaScript)
         const display = document.getElementById('display');
 
