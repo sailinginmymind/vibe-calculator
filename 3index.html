@@ -168,6 +168,20 @@ button {
       .then(() => console.log("PWA Registrata con successo!"));
   }
 </script>
+document.addEventListener('touchstart', function (event) {
+    if (event.touches.length > 1) {
+        event.preventDefault(); // Blocca il pinch-to-zoom (due dita)
+    }
+}, { passive: false });
+
+let lastTouchEnd = 0;
+document.addEventListener('touchend', function (event) {
+    let now = (new Date()).getTime();
+    if (now - lastTouchEnd <= 300) {
+        event.preventDefault(); // Blocca il double-tap zoom (tocco veloce)
+    }
+    lastTouchEnd = now;
+}, false);
 </body>
 </html>
 ..
