@@ -1,189 +1,53 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#e0e5ec">
     <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Vibe Calculator Pro</title>
     <style>
-        /* Blocca lo zoom e la selezione del testo su tutta la calcolatrice */
-html, body {
-    touch-action: none; 
-    user-select: none;
-    -webkit-user-select: none;
-    -webkit-tap-highlight-color: transparent; /* Elimina il fastidioso quadrato blu al tocco su iPhone */
-}
-
-/* Rende i bottoni reattivi all'istante */
-button {
-    touch-action: manipulation;
-}
-        /* IL VESTITO (CSS) - Qui gestiamo la griglia e l'estetica */
-        body { 
-            background-color: #e0e5ec; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh; 
+        /* CSS per il layout e protezione tocco */
+        body {
             margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-        }
-
-        .calculator { 
-            background-color: #e0e5ec; 
-            padding: 25px; 
-            border-radius: 30px; 
-            box-shadow: 20px 20px 60px #bec3c9, -20px -20px 60px #ffffff; 
-            width: 320px;
-        }
-
-        #display { 
-            width: 100%; 
-            height: 60px; 
-            border: none; 
-            background: #e0e5ec; 
-            box-shadow: inset 6px 6px 12px #bec3c9, inset -6px -6px 12px #ffffff; 
-            border-radius: 10px; 
-            margin-bottom: 25px; 
-            text-align: right; 
-            padding: 15px; 
-            font-size: 1.8rem; 
-            color: #444; 
-            box-sizing: border-box;
-        }
-
-        /* Griglia a 4 colonne fissa */
-        .buttons { 
-            display: grid; 
-            grid-template-columns: repeat(4, 1fr); 
-            gap: 15px; 
-        }
-
-        button { 
-            width: 60px; 
-            height: 60px; 
-            border-radius: 50%; 
-            border: none; 
-            background: #e0e5ec; 
-            box-shadow: 6px 6px 12px #bec3c9, -6px -6px 12px #ffffff; 
-            font-size: 1.2rem; 
-            cursor: pointer; 
-            transition: all 0.2s ease; 
             display: flex;
             justify-content: center;
             align-items: center;
+            height: 100vh;
+            background-color: #e0e0e0;
+            font-family: sans-serif;
+            touch-action: none; /* Blocca zoom a livello CSS */
         }
-
-        button:active { 
-            box-shadow: inset 4px 4px 8px #bec3c9, inset -4px -4px 8px #ffffff; 
-            transform: scale(0.95); 
-        }
-
-        .operator { color: #ff8c00; font-weight: bold; }
-        .clear { color: #eb4d4b; font-weight: bold; }
         
-        /* Tasto uguale che occupa due colonne per bilanciare la griglia */
-        .equal { 
-            grid-column: span 2; 
-            width: 135px; 
-            border-radius: 30px; 
-            background: #4caf50; 
-            color: white; 
-            font-weight: bold;
+        /* Qui va tutto il tuo CSS originale della calcolatrice... */
+        /* Assicurati che i tuoi bottoni abbiano questo: */
+        button {
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
         }
     </style>
 </head>
 <body>
 
-    <div class="calculator">
-        <input type="text" id="display" disabled placeholder="0">
-        <div class="buttons">
-            <button onclick="clearDisplay()" class="clear">C</button>
-            <button onclick="deleteLast()">⌫</button>
-            <button onclick="percentage()">%</button>
-            <button onclick="appendToDisplay('/')" class="operator">÷</button>
-            
-            <button onclick="appendToDisplay('7')">7</button>
-            <button onclick="appendToDisplay('8')">8</button>
-            <button onclick="appendToDisplay('9')">9</button>
-            <button onclick="appendToDisplay('*')" class="operator">×</button>
-            
-            <button onclick="appendToDisplay('4')">4</button>
-            <button onclick="appendToDisplay('5')">5</button>
-            <button onclick="appendToDisplay('6')">6</button>
-            <button onclick="appendToDisplay('-')" class="operator">-</button>
-            
-            <button onclick="appendToDisplay('1')">1</button>
-            <button onclick="appendToDisplay('2')">2</button>
-            <button onclick="appendToDisplay('3')">3</button>
-            <button onclick="appendToDisplay('+')" class="operator">+</button>
-            
-            <button onclick="appendToDisplay('0')">0</button>
-            <button onclick="appendToDisplay('.')">.</button>
-            <button onclick="calculate()" class="equal">=</button>
-        </div>
-    </div>
-<script>
-    // --- 1. PROTEZIONE ANTI-ZOOM (TESTO NASCOSTO) ---
-    // Questo blocca il doppio tocco veloce che causa lo zoom
-    document.addEventListener('touchstart', function (event) {
-        if (event.touches.length > 1) {
-            event.preventDefault(); 
+    <script>
+        // --- PROTEZIONE ANTI-ZOOM JAVASCRIPT ---
+        document.addEventListener('touchstart', function (event) {
+            if (event.touches.length > 1) event.preventDefault();
+        }, { passive: false });
+
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function (event) {
+            let now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) event.preventDefault();
+            lastTouchEnd = now;
+        }, false);
+
+        // --- FUNZIONE PER MIGLIAIA E DECIMALI ---
+        function formattaNumero(n) {
+            if (n === "" || isNaN(n)) return n;
+            return Number(n).toLocaleString('it-IT', { maximumFractionDigits: 10 });
         }
-    }, { passive: false });
 
-    let lastTouchEnd = 0;
-    document.addEventListener('touchend', function (event) {
-        let now = (new Date()).getTime();
-        if (now - lastTouchEnd <= 300) {
-            event.preventDefault(); 
-        }
-        lastTouchEnd = now;
-    }, false);
-
-    // --- 2. LOGICA DELLA CALCOLATRICE ---
-    const display = document.getElementById('display'); // Assicurati che l'ID del display sia 'display'
-
-    function aggiungi(valore) {
-        // Se il display mostra '0', sostituiscilo, altrimenti aggiungi
-        if (display.innerText === '0') {
-            display.innerText = valore;
-        } else {
-            display.innerText += valore;
-        }
-    }
-
-    function pulisci() {
-        display.innerText = '0';
-    }
-
-    function cancella() {
-        if (display.innerText.length > 1) {
-            display.innerText = display.innerText.slice(0, -1);
-        } else {
-            display.innerText = '0';
-        }
-    }
-
-    // --- 3. FUNZIONE FORMATO ITALIANO (MIGLIAIA E DECIMALI) ---
-    function calcola() {
-        try {
-            // Sostituiamo eventuali simboli visivi con quelli matematici
-            let espressione = display.innerText.replace(/×/g, '*').replace(/÷/g, '/');
-            let risultatoRaw = eval(espressione);
-
-            // Formattiamo il risultato con punti per le migliaia e virgola per i decimali
-            display.innerText = risultatoRaw.toLocaleString('it-IT', {
-                maximumFractionDigits: 10
-            });
-        } catch (e) {
-            display.innerText = 'Errore';
-            setTimeout(pulisci, 1500);
-        }
-    }
-</script>
-    
+        // AGGIUNGI QUI IL RESTO DELLE TUE FUNZIONI (calcola, aggiungi, etc.)
+    </script>
 </body>
 </html>
-..
