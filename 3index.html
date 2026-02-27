@@ -7,6 +7,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Vibe Calculator Pro</title>
     <style>
+        /* Blocca lo zoom e la selezione del testo su tutta la calcolatrice */
+html, body {
+    touch-action: none; 
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent; /* Elimina il fastidioso quadrato blu al tocco su iPhone */
+}
+
+/* Rende i bottoni reattivi all'istante */
+button {
+    touch-action: manipulation;
+}
         /* IL VESTITO (CSS) - Qui gestiamo la griglia e l'estetica */
         body { 
             background-color: #e0e5ec; 
