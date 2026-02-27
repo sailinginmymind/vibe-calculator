@@ -124,78 +124,66 @@ button {
             <button onclick="calculate()" class="equal">=</button>
         </div>
     </div>
-
-    <script>
-        function formattaElegante(valore) {
-    if (valore === "" || valore === undefined) return "";
-    
-    // Trasformiamo il valore in un numero vero
-    let numero = parseFloat(valore);
-    
-    // Se non è un numero (es. errore), restituisci il valore così com'è
-    if (isNaN(numero)) return valore;
-
-    return numero.toLocaleString('it-IT', {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 10 // Permette fino a 10 decimali se l'utente li scrive
-    });
-}
-        // IL CERVELLO (JavaScript)
-        const display = document.getElementById('display');
-
-        function appendToDisplay(input) {
-            display.value += input;
-        }
-
-        function clearDisplay() {
-            display.value = "";
-        }
-
-        function deleteLast() {
-            display.value = display.value.slice(0, -1);
-        }
-
-        function percentage() {
-            if (display.value !== "") {
-                try {
-                    // Calcola il valore attuale e lo divide per 100
-                    display.value = eval(display.value) / 100;
-                } catch (e) {
-                    display.value = "Errore";
-                }
-            }
-        }
-
-        function calculate() {
-            try {
-                if (display.value !== "") {
-                    display.value = eval(display.value);
-                }
-            } catch (error) {
-                display.value = "Errore";
-            }
-        }
-    </script>
 <script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js')
-      .then(() => console.log("PWA Registrata con successo!"));
-  }
-</script>
-document.addEventListener('touchstart', function (event) {
-    if (event.touches.length > 1) {
-        event.preventDefault(); // Blocca il pinch-to-zoom (due dita)
-    }
-}, { passive: false });
+    // --- 1. PROTEZIONE ANTI-ZOOM (TESTO NASCOSTO) ---
+    // Questo blocca il doppio tocco veloce che causa lo zoom
+    document.addEventListener('touchstart', function (event) {
+        if (event.touches.length > 1) {
+            event.preventDefault(); 
+        }
+    }, { passive: false });
 
-let lastTouchEnd = 0;
-document.addEventListener('touchend', function (event) {
-    let now = (new Date()).getTime();
-    if (now - lastTouchEnd <= 300) {
-        event.preventDefault(); // Blocca il double-tap zoom (tocco veloce)
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', function (event) {
+        let now = (new Date()).getTime();
+        if (now - lastTouchEnd <= 300) {
+            event.preventDefault(); 
+        }
+        lastTouchEnd = now;
+    }, false);
+
+    // --- 2. LOGICA DELLA CALCOLATRICE ---
+    const display = document.getElementById('display'); // Assicurati che l'ID del display sia 'display'
+
+    function aggiungi(valore) {
+        // Se il display mostra '0', sostituiscilo, altrimenti aggiungi
+        if (display.innerText === '0') {
+            display.innerText = valore;
+        } else {
+            display.innerText += valore;
+        }
     }
-    lastTouchEnd = now;
-}, false);
+
+    function pulisci() {
+        display.innerText = '0';
+    }
+
+    function cancella() {
+        if (display.innerText.length > 1) {
+            display.innerText = display.innerText.slice(0, -1);
+        } else {
+            display.innerText = '0';
+        }
+    }
+
+    // --- 3. FUNZIONE FORMATO ITALIANO (MIGLIAIA E DECIMALI) ---
+    function calcola() {
+        try {
+            // Sostituiamo eventuali simboli visivi con quelli matematici
+            let espressione = display.innerText.replace(/×/g, '*').replace(/÷/g, '/');
+            let risultatoRaw = eval(espressione);
+
+            // Formattiamo il risultato con punti per le migliaia e virgola per i decimali
+            display.innerText = risultatoRaw.toLocaleString('it-IT', {
+                maximumFractionDigits: 10
+            });
+        } catch (e) {
+            display.innerText = 'Errore';
+            setTimeout(pulisci, 1500);
+        }
+    }
+</script>
+    
 </body>
 </html>
 ..
